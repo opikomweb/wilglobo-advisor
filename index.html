@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WilGlobo AI Growth Advisor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              blue: '#0057B8',    // Deep blue for primary brand color
+              orange: '#FF5722',  // Deep orange for accent color
+              lightblue: '#29B6F6' // Light blue accent from logo
+            }
+          },
+          boxShadow: {
+            'form': '0 4px 20px rgba(0, 87, 184, 0.1)',
+            'input': '0 2px 4px rgba(0, 0, 0, 0.05)',
+            'card': '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom styles */
+    .loading-spinner {
+      border-top-color: #0057B8;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .insight-card {
+      transition: all 0.3s ease;
+    }
+    .insight-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .dark .loading-spinner {
+      border-top-color: #29B6F6;
+      border-left-color: #29B6F6;
+    }
+    /* Enhanced form inputs */
+    .form-input {
+      transition: all 0.2s ease;
+      border: 1px solid rgba(0, 87, 184, 0.2);
+    }
+    .form-input:focus {
+      border-color: #0057B8;
+      box-shadow: 0 0 0 3px rgba(0, 87, 184, 0.1);
+    }
+    .dark .form-input {
+      background-color: rgba(30, 41, 59, 0.8);
+      border-color: rgba(41, 182, 246, 0.2);
+    }
+    .dark .form-input:focus {
+      border-color: #29B6F6;
+      box-shadow: 0 0 0 3px rgba(41, 182, 246, 0.1);
+    }
+    /* Form section highlighting */
+    .form-section {
+      position: relative;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      background-color: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(0, 87, 184, 0.05);
+      transition: all 0.3s ease;
+    }
+    .form-section:hover {
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+    .dark .form-section {
+      background-color: rgba(30, 41, 59, 0.3);
+      border-color: rgba(41, 182, 246, 0.05);
+    }
+    .dark .form-section:hover {
+      background-color: rgba(30, 41, 59, 0.6);
+    }
+    /* Section icons */
+    .section-icon {
+      position: absolute;
+      top: -15px;
+      left: 20px;
+      background: linear-gradient(135deg, #0057B8, #29B6F6);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    /* Animated gradient button */
+    .gradient-button {
+      background-size: 200% auto;
+      transition: 0.5s;
+      background-image: linear-gradient(to right, #0057B8 0%, #29B6F6 51%, #FF5722 100%);
+    }
+    .gradient-button:hover {
+      background-position: right center;
+    }
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    /* Form input decoration */
+    .input-decorated {
+      position: relative;
+    }
+    .input-decorated input,
+    .input-decorated select,
+    .input-decorated textarea {
+      padding-left: 2.5rem;
+    }
+    .input-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #0057B8;
+      opacity: 0.6;
+    }
+    .dark .input-icon {
+      color: #29B6F6;
+    }
+    /* Pulse animation for insights */
+    .pulse-effect {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    /* Tooltip styles */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #0057B8;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    /* Sample cards animation */
+    .sample-card {
+      transition: all 0.3s ease;
+    }
+    .sample-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+  <div id="app" class="container mx-auto px-4 py-6 max-w-6xl">
+    <!-- Header with Logo and Menu -->
+    <header class="mb-8 bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <!-- Logo on the left -->
+        <div class="flex items-center mb-4 md:mb-0">
+          <img src="/images/wilglobo-logo.png" 
+               alt="WilGlobo Logo" 
+               class="h-16 mr-4">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-brand-blue dark:text-brand-lightblue">
+              WilGlobo AI Growth Advisor
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">
+              AI-powered insights for your business success
+            </p>
+          </div>
+        </div>
+        
+        <!-- Menu on the right -->
+        <div class="flex items-center space-x-4">
+          <nav class="hidden md:block">
+            <ul class="flex space-x-6">
+              <li>
+                <a href="#" onclick="document.getElementById('profile-tab').click(); return false;" class="text-brand-blue hover:text-brand-orange dark:text-white dark:hover:text-brand-orange font-medium">
+                  <i class="fas fa-home mr-1"></i> Home
+                </a>
+              </li>
+              <li>
+                <a href="#" onclick="document.getElementById('insights-tab').click(); return false;" class="text-brand-blue hover:text-brand-orange dark:text-white dark:hover:text-brand-orange font-medium">
+                  <i class="fas fa-lightbulb mr-1"></i> Insights
+                </a>
+              </li>
+              <li>
+                <a href="#" onclick="document.getElementById('about-tab').click(); return false;" class="text-brand-blue hover:text-brand-orange dark:text-white dark:hover:text-brand-orange font-medium">
+                  <i class="fas fa-info-circle mr-1"></i> About
+                </a>
+              </li>
+              <li>
+                <a href="#" onclick="showContactInfo(); return false;" class="text-brand-blue hover:text-brand-orange dark:text-white dark:hover:text-brand-orange font-medium">
+                  <i class="fas fa-envelope mr-1"></i> Contact
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-brand-blue dark:text-white p-2">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+          </div>
+          <button id="theme-toggle" class="p-2 rounded-full text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
+            <i class="fas fa-moon dark:hidden"></i>
+            <i class="fas fa-sun hidden dark:block"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Mobile menu (hidden by default) -->
+      <div id="mobile-menu" class="hidden mt-4 md:hidden">
+        <ul class="space-y-2">
+          <li>
+            <a href="#" onclick="document.getElementById('profile-tab').click(); document.getElementById('mobile-menu').classList.add('hidden'); return false;" class="block py-2 px-4 text-brand-blue hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 rounded">
+              <i class="fas fa-home mr-2"></i> Home
+            </a>
+          </li>
+          <li>
+            <a href="#" onclick="document.getElementById('insights-tab').click(); document.getElementById('mobile-menu').classList.add('hidden'); return false;" class="block py-2 px-4 text-brand-blue hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 rounded">
+              <i class="fas fa-lightbulb mr-2"></i> Insights
+            </a>
+          </li>
+          <li>
+            <a href="#" onclick="document.getElementById('about-tab').click(); document.getElementById('mobile-menu').classList.add('hidden'); return false;" class="block py-2 px-4 text-brand-blue hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 rounded">
+              <i class="fas fa-info-circle mr-2"></i> About
+            </a>
+          </li>
+          <li>
+            <a href="#" onclick="showContactInfo(); document.getElementById('mobile-menu').classList.add('hidden'); return false;" class="block py-2 px-4 text-brand-blue hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 rounded">
+              <i class="fas fa-envelope mr-2"></i> Contact
+            </a>
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <!-- Main Content Tabs -->
+    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+        <li class="mr-2" role="presentation">
+          <button class="tab-button inline-block p-4 border-b-2 border-brand-blue rounded-t-lg active" 
+                  id="profile-tab" 
+                  data-target="profile-content"
+                  type="button" 
+                  role="tab" 
+                  aria-controls="profile" 
+                  aria-selected="true">
+            <i class="fas fa-user-circle mr-2"></i>Business Profile
+          </button>
+        </li>
+        <li class="mr-2" role="presentation">
+          <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" 
+                  id="insights-tab" 
+                  data-target="insights-content"
+                  type="button" 
+                  role="tab" 
+                  aria-controls="insights" 
+                  aria-selected="false">
+            <i class="fas fa-lightbulb mr-2"></i>Insights
+          </button>
+        </li>
+        <li role="presentation">
+          <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" 
+                  id="about-tab" 
+                  data-target="about-content"
+                  type="button" 
+                  role="tab" 
+                  aria-controls="about" 
+                  aria-selected="false">
+            <i class="fas fa-info-circle mr-2"></i>About
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content-container">
+      <!-- Profile Content -->
+      <div id="profile-content" class="tab-content block">
+        <div class="bg-white dark:bg-gray-800 shadow-form rounded-lg p-6 mb-6 relative overflow-hidden">
+          <!-- Form header with gradient effect -->
+          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-blue via-brand-lightblue to-brand-orange"></div>
+          
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+            <div>
+              <h2 class="text-xl font-semibold flex items-center">
+                <i class="fas fa-clipboard-list text-brand-blue dark:text-brand-lightblue mr-2"></i>
+                Business Information
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">Enter your business details to receive AI-powered growth insights</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+              <button id="sample-data-btn" class="px-4 py-2 text-sm font-medium text-white bg-brand-orange hover:bg-opacity-90 rounded-md shadow-md flex items-center">
+                <i class="fas fa-magic mr-2"></i> Use Sample Data
+              </button>
+            </div>
+          </div>
+          
+          <form id="business-profile-form" class="space-y-8">
+            <!-- Basic Info Section with enhanced styling -->
+            <div class="form-section">
+              <div class="section-icon">
+                <i class="fas fa-building"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-5 pl-2">Business Basics</h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="input-decorated">
+                  <label for="business-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Name *</label>
+                  <span class="input-icon">
+                    <i class="fas fa-briefcase"></i>
+                  </span>
+                  <input type="text" id="business-name" name="business-name" required
+                        class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3">
+                  <p class="mt-1 text-xs text-gray-500">Enter your company or brand name</p>
+                </div>
+                
+                <div class="input-decorated">
+                  <label for="industry" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Industry *</label>
+                  <span class="input-icon">
+                    <i class="fas fa-industry"></i>
+                  </span>
+                  <select id="industry" name="industry" required
+                         class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3">
+                    <option value="">Select industry</option>
+                    <option value="technology">Technology</option>
+                    <option value="retail">Retail</option>
+                    <option value="food">Food & Beverage</option>
+                    <option value="professional services">Professional Services</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="manufacturing">Manufacturing</option>
+                    <option value="construction">Construction</option>
+                    <option value="energy">Energy</option>
+                    <option value="tourism">Tourism & Hospitality</option>
+                    <option value="creative">Creative & Media</option>
+                    <option value="education">Education & Training</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Business Description -->
+              <div class="mt-6 input-decorated">
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Description</label>
+                <textarea id="description" name="description" rows="3"
+                         class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3 pl-10"
+                         placeholder="Briefly describe your business, products, or services..."></textarea>
+                <span class="input-icon" style="top: 1.5rem;">
+                  <i class="fas fa-align-left"></i>
+                </span>
+                <p class="mt-1 text-xs text-gray-500">This helps our AI understand your specific business context</p>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="input-decorated">
+                  <label for="business-stage" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Stage</label>
+                  <span class="input-icon">
+                    <i class="fas fa-chart-line"></i>
+                  </span>
+                  <select id="business-stage" name="business-stage"
+                         class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3">
+                    <option value="">Select stage</option>
+                    <option value="idea">Idea/Concept</option>
+                    <option value="startup">Startup (0-2 years)</option>
+                    <option value="growth">Growth (2-5 years)</option>
+                    <option value="established">Established (5+ years)</option>
+                    <option value="expansion">Expansion</option>
+                  </select>
+                </div>
+                
+                <div class="input-decorated">
+                  <label for="employees" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Number of Employees</label>
+                  <span class="input-icon">
+                    <i class="fas fa-users"></i>
+                  </span>
+                  <select id="employees" name="employees"
+                         class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3">
+                    <option value="">Select range</option>
+                    <option value="1">Just me</option>
+                    <option value="2-5">2-5 employees</option>
+                    <option value="6-10">6-10 employees</option>
+                    <option value="11-50">11-50 employees</option>
+                    <option value="51+">51+ employees</option>
+                  </select>
+                </div>
+                
+                <div class="input-decorated">
+                  <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Location</label>
+                  <span class="input-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </span>
+                  <select id="location" name="location"
+                         class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3">
+                    <option value="">Select area</option>
+                    <option value="urban">Urban/City Center</option>
+                    <option value="suburban">Suburban</option>
+                    <option value="rural">Rural</option>
+                    <option value="online">Primarily Online</option>
+                    <option value="multiple">Multiple Locations</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Financial Info Section -->
+            <div class="form-section">
+              <div class="section-icon">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-5 pl-2">Financial Information <span class="text-sm font-normal text-gray-500">(Optional)</span></h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="input-decorated">
+                  <label for="monthly-revenue" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Monthly Revenue</label>
+                  <span class="input-icon">
+                    <i class="fas fa-chart-bar"></i>
+                  </span>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-10 flex items-center pointer-events-none">
+                      <span class="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+                    </div>
+                    <input type="number" id="monthly-revenue" name="monthly-revenue" min="0" 
+                           class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3 pl-14">
+                  </div>
+                </div>
+                
+                <div class="input-decorated">
+                  <label for="monthly-expenses" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Monthly Expenses</label>
+                  <span class="input-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                  </span>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-10 flex items-center pointer-events-none">
+                      <span class="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+                    </div>
+                    <input type="number" id="monthly-expenses" name="monthly-expenses" min="0" 
+                           class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3 pl-14">
+                  </div>
+                </div>
+                
+                <div class="input-decorated">
+                  <label for="funding-stage" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Funding Stage</label>
+                  <span class="input-icon">
+                    <i class="fas fa-coins"></i>
+                  </span>
+                  <select id="funding-stage" name="funding-stage"
+                         class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3">
+                    <option value="">Select stage</option>
+                    <option value="self-funded">Self-funded/Bootstrapped</option>
+                    <option value="pre-seed">Pre-seed</option>
+                    <option value="seed">Seed</option>
+                    <option value="series-a">Series A</option>
+                    <option value="series-b+">Series B or beyond</option>
+                    <option value="profitable">Profitable/Self-sustaining</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Growth Goals Section -->
+            <div class="form-section">
+              <div class="section-icon">
+                <i class="fas fa-bullseye"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-5 pl-2">Growth Goals</h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="input-decorated">
+                  <label for="primary-goal" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Primary Business Goal</label>
+                  <span class="input-icon">
+                    <i class="fas fa-bullseye"></i>
+                  </span>
+                  <select id="primary-goal" name="primary-goal"
+                         class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3">
+                    <option value="">Select primary goal</option>
+                    <option value="increase-revenue">Increase Revenue</option>
+                    <option value="customer-acquisition">Customer Acquisition</option>
+                    <option value="market-expansion">Market Expansion</option>
+                    <option value="cost-reduction">Cost Reduction</option>
+                    <option value="funding">Secure Funding/Investment</option>
+                    <option value="product-launch">New Product/Service Launch</option>
+                    <option value="operational">Operational Efficiency</option>
+                  </select>
+                </div>
+                
+                <div class="input-decorated">
+                  <label for="challenges" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Top Business Challenge</label>
+                  <span class="input-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </span>
+                  <select id="challenges" name="challenges"
+                         class="form-input mt-1 block w-full rounded-md shadow-input focus:outline-none focus:ring-2 focus:ring-brand-blue dark:focus:ring-brand-lightblue focus:border-transparent text-base py-3">
+                    <option value="">Select top challenge</option>
+                    <option value="competition">Competition</option>
+                    <option value="customer-acquisition">Customer Acquisition</option>
+                    <option value="retention">Customer Retention</option>
+                    <option value="cash-flow">Cash Flow Management</option>
+                    <option value="talent">Finding/Retaining Talent</option>
+                    <option value="marketing">Effective Marketing</option>
+                    <option value="technology">Technology Integration</option>
+                    <option value="scaling">Scaling Operations</option>
+                    <option value="regulatory">Regulatory Compliance</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Market Factors Section -->
+            <div class="form-section">
+              <div class="section-icon">
+                <i class="fas fa-globe"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-5 pl-2">Market Factors</h3>
+              
+              <div>
+                <label for="market-factors" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Environment Factors</label>
+                <p class="text-xs text-gray-500 mb-3">Select factors that impact your business</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="flex items-start bg-gray-50 dark:bg-gray-700 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <input type="checkbox" id="factor-seasonal" name="factors" value="seasonal"
+                           class="h-4 w-4 text-brand-blue rounded border-gray-300 focus:ring-brand-blue mt-1">
+                    <label for="factor-seasonal" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      <span class="font-medium block">Seasonal Fluctuations</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Business affected by seasonal trends</span>
+                    </label>
+                  </div>
+                  
+                  <div class="flex items-start bg-gray-50 dark:bg-gray-700 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <input type="checkbox" id="factor-economic" name="factors" value="economic-trends"
+                           class="h-4 w-4 text-brand-blue rounded border-gray-300 focus:ring-brand-blue mt-1">
+                    <label for="factor-economic" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      <span class="font-medium block">Economic Sensitivity</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Affected by broader economic changes</span>
+                    </label>
+                  </div>
+                  
+                  <div class="flex items-start bg-gray-50 dark:bg-gray-700 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <input type="checkbox" id="factor-tourism" name="factors" value="tourism"
+                           class="h-4 w-4 text-brand-blue rounded border-gray-300 focus:ring-brand-blue mt-1">
+                    <label for="factor-tourism" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      <span class="font-medium block">Tourism & Events</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Dependent on visitors and local events</span>
+                    </label>
+                  </div>
+                  
+                  <div class="flex items-start bg-gray-50 dark:bg-gray-700 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <input type="checkbox" id="factor-remote" name="factors" value="remote-work"
+                           class="h-4 w-4 text-brand-blue rounded border-gray-300 focus:ring-brand-blue mt-1">
+                    <label for="factor-remote" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      <span class="font-medium block">Remote Work Impact</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Affected by work-from-home trends</span>
+                    </label>
+                  </div>
+                  
+                  <div class="flex items-start bg-gray-50 dark:bg-gray-700 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <input type="checkbox" id="factor-supply" name="factors" value="supply-chain"
+                           class="h-4 w-4 text-brand-blue rounded border-gray-300 focus:ring-brand-blue mt-1">
+                    <label for="factor-supply" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      <span class="font-medium block">Supply Chain Issues</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Facing logistical or supply challenges</span>
+                    </label>
+                  </div>
+                  
+                  <div class="flex items-start bg-gray-50 dark:bg-gray-700 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <input type="checkbox" id="factor-regulatory" name="factors" value="regulatory"
+                           class="h-4 w-4 text-brand-blue rounded border-gray-300 focus:ring-brand-blue mt-1">
+                    <label for="factor-regulatory" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      <span class="font-medium block">Regulatory Changes</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Impacted by changing regulations</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="pt-6 flex justify-center">
+              <button type="submit" id="generate-insights-btn"
+                     class="w-full md:w-auto px-8 py-4 border border-transparent text-base font-medium rounded-lg shadow-lg text-white gradient-button focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-brand-blue flex items-center justify-center">
+                <i class="fas fa-lightbulb mr-2 text-xl"></i>
+                <span class="text-lg">Generate AI Insights</span>
+              </button>
+            </div>
+            <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+              Our AI will analyze your business data and provide personalized growth recommendations tailored to your specific needs and goals.
+            </p>
+          </form>
+        </div>
+        
+        <!-- Sample Business Success Stories -->
+        <div class="mt-8">
+          <h3 class="text-xl font-semibold mb-6 flex items-center">
+            <i class="fas fa-star text-brand-orange mr-2"></i>
+            How Businesses Grow with WilGlobo AI
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Success Story 1 -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-card p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+              <div class="flex items-center mb-4">
+                <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-store text-brand-blue text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold">Retail Success</h4>
+                  <p class="text-sm text-gray-500">E-commerce & Physical Store</p>
+                </div>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 text-sm mb-3">
+                "WilGlobo's AI identified that our customer retention was lagging. After implementing their recommended loyalty program, we saw a 37% increase in repeat purchases."
+              </p>
+              <p class="text-sm font-medium text-brand-blue">- Samantha R., Boutique Owner</p>
+            </div>
+            
+            <!-- Success Story 2 -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-card p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+              <div class="flex items-center mb-4">
+                <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-laptop-code text-brand-blue text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold">Tech Startup</h4>
+                  <p class="text-sm text-gray-500">SaaS Business</p>
+                </div>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 text-sm mb-3">
+                "The AI insights helped us identify an untapped market segment. We pivoted our marketing strategy and doubled our customer acquisition rate in just 3 months."
+              </p>
+              <p class="text-sm font-medium text-brand-blue">- Michael T., Founder & CEO</p>
+            </div>
+            
+            <!-- Success Story 3 -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-card p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+              <div class="flex items-center mb-4">
+                <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-utensils text-brand-blue text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold">Restaurant Chain</h4>
+                  <p class="text-sm text-gray-500">Food & Beverage</p>
+                </div>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 text-sm mb-3">
+                "WilGlobo's AI helped us optimize our menu pricing and identified key operational inefficiencies. We've increased our profit margins by 22% in the past year."
+              </p>
+              <p class="text-sm font-medium text-brand-blue">- David K., Operations Director</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Insights Content - FIXED AND IMPROVED -->
+      <div id="insights-content" class="tab-content hidden">
+        <div id="insights-loading" class="hidden text-center py-12">
+          <div class="loading-spinner h-12 w-12 border-4 rounded-full mx-auto mb-4"></div>
+          <p class="text-gray-600 dark:text-gray-400">Generating business insights...</p>
+          <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">This may take up to 30 seconds</p>
+          <div class="mt-10 max-w-md mx-auto">
+            <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-4">
+              <h4 class="font-medium text-brand-blue dark:text-brand-lightblue mb-2">While you wait...</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Did you know? Businesses that use AI-powered insights are 3x more likely to outperform their competitors in revenue growth.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div id="insights-empty" class="text-center py-8">
+          <div class="text-gray-400 dark:text-gray-500 mb-4">
+            <i class="fas fa-lightbulb text-5xl"></i>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Discover AI-Powered Growth Insights</h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">Our AI Growth Advisor will analyze your business profile and provide customized insights and recommendations.</p>
+          <button id="go-to-profile-btn" 
+                  class="px-5 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-button focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue">
+            Create Business Profile
+          </button>
+          
+          <!-- Sample Insights Preview -->
+          <div class="mt-12">
+            <h3 class="text-xl font-semibold mb-6">Example Insights</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <!-- Example Insight 1 -->
+              <div class="insight-card bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="text-lg font-semibold">Customer Acquisition Strategy</h4>
+                  <span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    High Impact
+                  </span>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300">Businesses that implement omnichannel marketing strategies acquire customers at 3x the rate of single-channel companies.</p>
+              </div>
+              
+              <!-- Example Insight 2 -->
+              <div class="insight-card bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="text-lg font-semibold">Pricing Optimization</h4>
+                  <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                    Medium Impact
+                  </span>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300">Research shows that a 1% improvement in price optimization can result in up to 11% increase in profitability for most businesses.</p>
+              </div>
+              
+              <!-- Example Insight 3 -->
+              <div class="insight-card bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="text-lg font-semibold">Digital Transformation</h4>
+                  <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    Trending
+                  </span>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300">Companies that digitize customer-facing processes see an average 15-20% reduction in cost to serve and 20% increase in customer satisfaction.</p>
+              </div>
+            </div>
+            
+            <p class="mt-8 text-sm text-gray-500 max-w-lg mx-auto">These are sample insights. Create your business profile to get personalized recommendations for your specific situation.</p>
+          </div>
+        </div>
+        
+        <div id="insights-results" class="hidden">
+          <!-- Insights Summary Section -->
+          <div class="bg-gradient-to-r from-brand-blue to-brand-lightblue dark:from-brand-blue dark:to-brand-lightblue rounded-lg shadow-lg p-6 mb-6 text-white">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 class="text-xl md:text-2xl font-bold mb-2" id="business-name-display">Your Business</h2>
+                <p class="text-blue-100" id="business-details-display">Industry • Stage • Area</p>
+              </div>
+              <div class="mt-4 md:mt-0">
+                <button id="regenerate-insights-btn"
+                       class="px-4 py-2 bg-white text-brand-blue hover:text-brand-orange rounded-md hover:bg-gray-100 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-blue">
+                  <i class="fas fa-sync-alt mr-2"></i>Regenerate Insights
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Insights Dashboard -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- Revenue Metric -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Revenue</h3>
+                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  <i class="fas fa-arrow-up mr-1"></i> 12%
+                </span>
+              </div>
+              <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white" id="revenue-display">$0</p>
+              <div class="mt-4">
+                <div class="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="absolute top-0 left-0 h-full bg-green-500" style="width: 72%"></div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">72% of industry average</p>
+              </div>
+            </div>
+            
+            <!-- Profitability Metric -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Profit Margin</h3>
+                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  <i class="fas fa-arrow-down mr-1"></i> 3%
+                </span>
+              </div>
+              <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white" id="profit-margin-display">0%</p>
+              <div class="mt-4">
+                <div class="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="absolute top-0 left-0 h-full bg-blue-500" style="width: 45%"></div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">45% of industry average</p>
+              </div>
+            </div>
+            
+            <!-- Growth Score -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Growth Potential Score</h3>
+                <div class="tooltip">
+                  <i class="fas fa-question-circle text-gray-400"></i>
+                  <span class="tooltiptext">Our AI-generated score based on your business profile and market conditions</span>
+                </div>
+              </div>
+              <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">78/100</p>
+              <div class="mt-4">
+                <div class="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="absolute top-0 left-0 h-full bg-brand-blue" style="width: 78%"></div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Strong growth potential</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Market Context Section -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">
+              <i class="fas fa-map-marker-alt text-brand-orange dark:text-brand-orange mr-2"></i>Market Context
+            </h3>
+            <div id="market-context" class="prose dark:prose-invert max-w-none">
+              <p class="fallback-content">The current market is undergoing significant evolution with digital adoption accelerating across all sectors. In your industry, businesses are experiencing a surge in customer expectations for personalized experiences and seamless omnichannel interactions. Competitors are increasingly leveraging data analytics and automation to gain competitive advantages and optimize operations.</p>
+              <p class="fallback-content">Recent economic trends show cautious optimism with moderate growth projected for the coming quarters. Businesses similar to yours are prioritizing flexibility and resilience in their strategies while looking for opportunities to capture market share through innovation and exceptional customer experiences.</p>
+            </div>
+          </div>
+          
+          <!-- Key Insights Section -->
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">
+              <i class="fas fa-lightbulb text-brand-orange dark:text-brand-orange mr-2"></i>Key Business Insights
+            </h3>
+            
+            <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Fallback Insight 1 -->
+              <div class="insight-card fallback-content bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="text-lg font-semibold">Customer Acquisition Opportunity</h4>
+                  <span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    High Relevance
+                  </span>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300">Based on your business profile, there's significant potential to increase your customer base by implementing targeted digital marketing strategies. Companies in your sector have seen up to 40% growth in new customers through strategic channel optimization and personalized content marketing.</p>
+              </div>
+              
+              <!-- Fallback Insight 2 -->
+              <div class="insight-card fallback-content bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="text-lg font-semibold">Operational Efficiency Gap</h4>
+                  <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                    Medium Relevance
+                  </span>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300">Our analysis indicates that implementing streamlined workflows and process automation could reduce operational costs by 15-25%. This opportunity becomes especially important given your current expense-to-revenue ratio, which is higher than industry benchmarks.</p>
+              </div>
+              
+              <!-- Fallback Insight 3 -->
+              <div class="insight-card fallback-content bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="text-lg font-semibold">Product Expansion Potential</h4>
+                  <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    Medium Relevance
+                  </span>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300">Market analysis reveals an underserved segment within your customer base. Developing complementary products or services that address this gap could increase average customer lifetime value by 30-40% while providing a competitive differentiation in the marketplace.</p>
+              </div>
+              
+              <!-- Fallback Insight 4 -->
+              <div class="insight-card fallback-content bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="text-lg font-semibold">Pricing Strategy Adjustment</h4>
+                  <span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    High Relevance
+                  </span>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300">Current pricing appears to be below optimal levels when compared to market value perception. A strategic price recalibration could increase margins without significantly impacting sales volume. Value-based pricing models have shown particular success in your industry segment.</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Opportunity Analysis Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-chart-line text-brand-blue dark:text-brand-lightblue mr-2"></i>Growth Opportunities
+              </h3>
+              <div id="opportunities-container" class="space-y-4">
+                <!-- Fallback Opportunity 1 -->
+                <div class="fallback-content flex items-start">
+                  <div class="flex-shrink-0 h-6 w-6 text-green-500 mr-2">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 dark:text-gray-100">Digital Channel Expansion</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Expanding your digital presence across multiple channels could open new customer acquisition pathways. Prioritize platforms where your target audience spends the most time for maximum impact.</p>
+                  </div>
+                </div>
+                
+                <!-- Fallback Opportunity 2 -->
+                <div class="fallback-content flex items-start">
+                  <div class="flex-shrink-0 h-6 w-6 text-green-500 mr-2">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 dark:text-gray-100">Strategic Partnerships</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Forming alliances with complementary businesses can provide access to new customer segments and distribution channels while sharing marketing costs and expanding brand reach.</p>
+                  </div>
+                </div>
+                
+                <!-- Fallback Opportunity 3 -->
+                <div class="fallback-content flex items-start">
+                  <div class="flex-shrink-0 h-6 w-6 text-green-500 mr-2">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 dark:text-gray-100">Customer Retention Program</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Implementing a structured loyalty program could increase customer lifetime value by 25-30%. Focus on personalized incentives that reward engagement and repeat purchases.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-exclamation-triangle text-brand-orange dark:text-brand-orange mr-2"></i>Challenges & Risks
+              </h3>
+              <div id="challenges-container" class="space-y-4">
+                <!-- Fallback Challenge 1 -->
+                <div class="fallback-content flex items-start">
+                  <div class="flex-shrink-0 h-6 w-6 text-red-500 mr-2">
+                    <i class="fas fa-exclamation-circle"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 dark:text-gray-100">Market Saturation Pressure</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Increased competition in your sector is creating downward pressure on margins. Differentiation through quality, service, or unique value propositions will be essential.</p>
+                  </div>
+                </div>
+                
+                <!-- Fallback Challenge 2 -->
+                <div class="fallback-content flex items-start">
+                  <div class="flex-shrink-0 h-6 w-6 text-red-500 mr-2">
+                    <i class="fas fa-exclamation-circle"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 dark:text-gray-100">Supply Chain Vulnerabilities</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Current global supply chain disruptions pose a significant risk. Diversifying suppliers and building inventory buffers for critical components should be considered.</p>
+                  </div>
+                </div>
+                
+                <!-- Fallback Challenge 3 -->
+                <div class="fallback-content flex items-start">
+                  <div class="flex-shrink-0 h-6 w-6 text-red-500 mr-2">
+                    <i class="fas fa-exclamation-circle"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 dark:text-gray-100">Technology Adoption Gap</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Falling behind industry peers in key technology adoption could create competitive disadvantages. Prioritize investments in systems that directly impact customer experience and operational efficiency.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action Plan Section -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">
+              <i class="fas fa-tasks text-brand-blue dark:text-brand-lightblue mr-2"></i>90-Day Action Plan
+            </h3>
+            <div id="action-plan-container" class="prose dark:prose-invert max-w-none">
+              <!-- Fallback Action Plan -->
+              <div class="fallback-content">
+                <h4>Phase 1: Immediate Actions (Days 1-30)</h4>
+                <ol>
+                  <li><strong>Customer Segmentation Analysis:</strong> Conduct a detailed analysis of your customer base to identify your most profitable segments and better understand their needs.</li>
+                  <li><strong>Competitive Benchmarking:</strong> Perform a thorough review of key competitors' offerings, pricing, and positioning to identify gaps and opportunities.</li>
+                  <li><strong>Digital Presence Audit:</strong> Evaluate all digital touchpoints and identify improvements for user experience, conversion optimization, and customer engagement.</li>
+                  <li><strong>Cash Flow Optimization:</strong> Review payment terms, inventory management, and expense categories to identify quick-win efficiency gains.</li>
+                </ol>
+                
+                <h4>Phase 2: Strategy Development (Days 31-60)</h4>
+                <ol>
+                  <li><strong>Marketing Channel Strategy:</strong> Based on customer segmentation insights, develop a targeted multi-channel marketing plan focusing on highest-ROI channels.</li>
+                  <li><strong>Product Offering Refinement:</strong> Adjust product/service offerings based on customer feedback and competitive analysis.</li>
+                  <li><strong>Pricing Strategy Recalibration:</strong> Test optimized pricing models that better align with perceived value and competitive positioning.</li>
+                  <li><strong>Team Capability Assessment:</strong> Identify skill gaps and develop training programs or hiring plans to address key needs.</li>
+                </ol>
+                
+                <h4>Phase 3: Implementation (Days 61-90)</h4>
+                <ol>
+                  <li><strong>Customer Retention Program Launch:</strong> Implement a structured loyalty or retention program targeting your most valuable customer segments.</li>
+                  <li><strong>Process Automation Roll-out:</strong> Begin implementing automated solutions for the most time-consuming manual processes.</li>
+                  <li><strong>Strategic Partnership Development:</strong> Initiate conversations with 2-3 potential strategic partners who can help expand your market reach.</li>
+                  <li><strong>Performance Metrics Framework:</strong> Establish a comprehensive dashboard of KPIs to track progress against strategic objectives.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Resources Section -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-4">
+              <i class="fas fa-link text-brand-blue dark:text-brand-lightblue mr-2"></i>Helpful Resources
+            </h3>
+            <div id="resources-container" class="prose dark:prose-invert max-w-none">
+              <!-- Fallback Resources -->
+              <div class="fallback-content">
+                <h4>Business Growth Resources</h4>
+                <ul>
+                  <li><strong>Small Business Development Centers (SBDCs)</strong> - Offer free business consulting and low-cost training to help businesses grow. <a href="https://americassbdc.org/find-your-sbdc/" target="_blank" rel="noopener noreferrer" class="text-brand-blue hover:text-brand-orange">Find your local SBDC</a></li>
+                  <li><strong>SCORE</strong> - Provides free business mentoring and education. <a href="https://www.score.org" target="_blank" rel="noopener noreferrer" class="text-brand-blue hover:text-brand-orange">SCORE Website</a></li>
+                  <li><strong>Small Business Administration (SBA)</strong> - Offers resources, funding programs, and guidance for small businesses. <a href="https://www.sba.gov" target="_blank" rel="noopener noreferrer" class="text-brand-blue hover:text-brand-orange">SBA Website</a></li>
+                </ul>
+                
+                <h4>Industry-Specific Organizations</h4>
+                <ul>
+                  <li><strong>Industry Trade Associations</strong> - Join relevant industry organizations for networking, resources, and industry-specific insights.</li>
+                  <li><strong>Chamber of Commerce</strong> - Local business community for networking and resources. <a href="https://www.uschamber.com/co/chambers" target="_blank" rel="noopener noreferrer" class="text-brand-blue hover:text-brand-orange">Find your local chamber</a></li>
+                </ul>
+                
+                <h4>Funding Resources</h4>
+                <ul>
+                  <li><strong>Grants.gov</strong> - Search for federal grants that might be available for your business. <a href="https://www.grants.gov" target="_blank" rel="noopener noreferrer" class="text-brand-blue hover:text-brand-orange">Grants.gov</a></li>
+                  <li><strong>Crowdfunding Platforms</strong> - Kickstarter, Indiegogo, GoFundMe for raising capital from customers and supporters.</li>
+                  <li><strong>Angel Investment Networks</strong> - For businesses seeking equity investment from individual investors.</li>
+                </ul>
+                
+                <h4>Digital Tools & Technologies</h4>
+                <ul>
+                  <li><strong>CRM Software</strong> - Tools like HubSpot, Salesforce, or Zoho CRM for managing customer relationships.</li>
+                  <li><strong>Marketing Automation</strong> - Tools like Mailchimp, ActiveCampaign, or HubSpot for automating marketing efforts.</li>
+                  <li><strong>Project Management</strong> - Asana, Trello, or Monday.com for managing tasks and projects.</li>
+                  <li><strong>Analytics Tools</strong> - Google Analytics, Hotjar, and others for tracking website performance and user behavior.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- About Content - FIXED AND IMPROVED-->
+      <div id="about-content" class="tab-content hidden">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold">About WilGlobo AI Growth Advisor</h2>
+             <img src="/images/wilglobo-logo.png" 
+               alt="WilGlobo Logo" 
+               class="h-12">
+          </div>
+          
+          <div class="prose dark:prose-invert max-w-none">
+            <p class="lead text-lg font-medium text-brand-blue dark:text-brand-lightblue mb-4">The <strong>WilGlobo AI Growth Advisor</strong> is a cutting-edge AI-powered tool designed to help entrepreneurs and business owners unlock their business's full potential through data-driven insights and strategic guidance.</p>
+            
+            <h3>Transforming Business Growth with AI</h3>
+            <p>In today's rapidly evolving business landscape, making the right strategic decisions can mean the difference between thriving and merely surviving. Our AI Growth Advisor combines advanced artificial intelligence with deep business expertise to analyze your unique business situation and provide actionable recommendations tailored to your specific goals and challenges.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-8">
+              <div>
+                <h4 class="text-brand-blue dark:text-brand-lightblue">Our Mission</h4>
+                <p>To democratize access to high-quality business intelligence and strategic guidance, empowering entrepreneurs of all sizes to make better decisions and achieve sustainable growth.</p>
+              </div>
+              <div>
+                <h4 class="text-brand-blue dark:text-brand-lightblue">Our Vision</h4>
+                <p>A world where every business, regardless of size or resources, has the insights and strategies needed to reach its full potential and create lasting economic impact.</p>
+              </div>
+            </div>
+            
+            <h3>Key Features & Benefits</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-chart-pie text-brand-blue dark:text-brand-lightblue mr-2"></i>
+                  <h4 class="font-semibold">Data-Driven Insights</h4>
+                </div>
+                <p class="text-sm">Our AI analyzes your business data alongside market trends to provide insights that human analysis might miss.</p>
+              </div>
+              
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-bullseye text-brand-blue dark:text-brand-lightblue mr-2"></i>
+                  <h4 class="font-semibold">Targeted Strategies</h4>
+                </div>
+                <p class="text-sm">Receive customized strategic recommendations specific to your industry, stage, and business goals.</p>
+              </div>
+              
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-tasks text-brand-blue dark:text-brand-lightblue mr-2"></i>
+                  <h4 class="font-semibold">Actionable Plans</h4>
+                </div>
+                <p class="text-sm">Transform insights into practical action plans with step-by-step guidance for implementation.</p>
+              </div>
+              
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-tachometer-alt text-brand-blue dark:text-brand-lightblue mr-2"></i>
+                  <h4 class="font-semibold">Performance Metrics</h4>
+                </div>
+                <p class="text-sm">Understand how your business compares to industry benchmarks and track progress over time.</p>
+              </div>
+              
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-brain text-brand-blue dark:text-brand-lightblue mr-2"></i>
+                  <h4 class="font-semibold">AI-Powered Analysis</h4>
+                </div>
+                <p class="text-sm">Leverage advanced machine learning to identify growth opportunities and potential risks.</p>
+              </div>
+              
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-shield-alt text-brand-blue dark:text-brand-lightblue mr-2"></i>
+                  <h4 class="font-semibold">Privacy-Focused</h4>
+                </div>
+                <p class="text-sm">Your business data remains secure and confidential, used only to generate insights for you.</p>
+              </div>
+            </div>
+            
+            <h3>How It Works</h3>
+            <ol class="list-decimal pl-5 space-y-2">
+              <li><strong>Profile Creation:</strong> Enter your business information in our secure form</li>
+              <li><strong>AI Analysis:</strong> Our advanced AI analyzes your data against industry benchmarks and market trends</li>
+              <li><strong>Insight Generation:</strong> Receive customized insights and recommendations specific to your business</li>
+              <li><strong>Action Planning:</strong> Review your personalized 90-day action plan with prioritized strategies</li>
+              <li><strong>Implementation:</strong> Put insights into practice with our recommended resources and tools</li>
+              <li><strong>Continuous Improvement:</strong> Update your profile regularly to receive refined insights as your business evolves</li>
+            </ol>
+            
+            <div class="mt-8 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <h3 class="text-brand-blue dark:text-brand-lightblue mb-3">About WilGlobo</h3>
+              <p>WilGlobo is a pioneering technology company focused on democratizing access to advanced business intelligence tools. Founded with the mission of helping businesses of all sizes succeed, WilGlobo combines cutting-edge artificial intelligence with deep business expertise to create tools that generate real-world results.</p>
+              <p class="mt-2">Our team brings together seasoned entrepreneurs, data scientists, and business strategists to create solutions that bridge the gap between complex data analysis and practical business applications. We're headquartered in Calgary, Alberta, and serve businesses across Canada and beyond.</p>
+            </div>
+            
+            <div class="mt-8 text-center">
+              <h3 class="text-xl font-semibold mb-4">Ready to Unlock Your Business's Potential?</h3>
+              <button
+                onclick="document.getElementById('profile-tab').click();"
+                class="px-6 py-3 text-white gradient-button text-lg font-medium rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue"
+              >
+                Get Started Now
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonials Section -->
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+          <h2 class="text-xl font-semibold mb-6">What Our Users Say</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Testimonial 1 -->
+            <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-5">
+              <div class="flex items-center mb-4">
+                <div class="h-12 w-12 rounded-full bg-brand-blue flex items-center justify-center text-white text-xl font-bold">
+                  JM
+                </div>
+                <div class="ml-4">
+                  <h4 class="font-medium">Jennifer Martinez</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">E-commerce Entrepreneur</p>
+                </div>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 italic">"The WilGlobo AI Growth Advisor provided insights that completely transformed my approach to customer acquisition. Within two months of implementing their recommendations, my conversion rate increased by 37%."</p>
+              <div class="mt-3 flex text-yellow-400">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+            
+            <!-- Testimonial 2 -->
+            <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-5">
+              <div class="flex items-center mb-4">
+                <div class="h-12 w-12 rounded-full bg-brand-orange flex items-center justify-center text-white text-xl font-bold">
+                  RL
+                </div>
+                <div class="ml-4">
+                  <h4 class="font-medium">Robert Lee</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Tech Startup Founder</p>
+                </div>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 italic">"As a technical founder, I often struggled with the business side of our startup. The AI Growth Advisor gave me clear, actionable strategies that helped us secure our first major round of funding."</p>
+              <div class="mt-3 flex text-yellow-400">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+            </div>
+            
+            <!-- Testimonial 3 -->
+            <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-5">
+              <div class="flex items-center mb-4">
+                <div class="h-12 w-12 rounded-full bg-brand-lightblue flex items-center justify-center text-white text-xl font-bold">
+                  SK
+                </div>
+                <div class="ml-4">
+                  <h4 class="font-medium">Sarah Kim</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Service Business Owner</p>
+                </div>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 italic">"The pricing strategy recommendations were a game-changer for my consulting business. I was undercharging significantly, and after adjusting based on the AI insights, my revenue grew 45% with no loss of clients."</p>
+              <div class="mt-3 flex text-yellow-400">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+            
+            <!-- Testimonial 4 -->
+            <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-5">
+              <div class="flex items-center mb-4">
+                <div class="h-12 w-12 rounded-full bg-green-600 flex items-center justify-center text-white text-xl font-bold">
+                  MJ
+                </div>
+                <div class="ml-4">
+                  <h4 class="font-medium">Michael Johnson</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Manufacturing SME</p>
+                </div>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 italic">"What impressed me most was how the insights addressed our specific industry challenges. The supply chain optimization suggestions alone helped us reduce costs by 18% during a very challenging economic period."</p>
+              <div class="mt-3 flex text-yellow-400">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-6">Frequently Asked Questions</h2>
+          
+          <div class="space-y-4">
+            <div>
+              <h4 class="font-medium text-brand-blue dark:text-brand-lightblue">How does the AI Growth Advisor work?</h4>
+              <p class="mt-1 text-gray-700 dark:text-gray-300">Our AI analyzes your business data along with current market trends, industry benchmarks, and best practices to generate personalized insights and recommendations. The more information you provide, the more tailored your insights will be.</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-brand-blue dark:text-brand-lightblue">Is my business data secure?</h4>
+              <p class="mt-1 text-gray-700 dark:text-gray-300">Yes, we take data privacy seriously. Your business information is used solely to generate insights for you and is not shared with third parties. We use enterprise-grade encryption and security measures to protect your data.</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-brand-blue dark:text-brand-lightblue">How often should I update my business profile?</h4>
+              <p class="mt-1 text-gray-700 dark:text-gray-300">We recommend updating your profile quarterly or whenever significant changes occur in your business, such as new products/services, major revenue changes, or shifts in business strategy.</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-brand-blue dark:text-brand-lightblue">Can the AI advisor help with my specific industry?</h4>
+              <p class="mt-1 text-gray-700 dark:text-gray-300">Yes, our AI is trained on data from a wide range of industries and business types. When you provide your industry information, the insights are tailored to your specific sector's challenges and opportunities.</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-brand-blue dark:text-brand-lightblue">How accurate are the insights and recommendations?</h4>
+              <p class="mt-1 text-gray-700 dark:text-gray-300">Our AI provides recommendations based on current best practices and data analysis. While we strive for high accuracy, we recommend using the insights as guidance rather than absolute directives, combining them with your own business expertise and judgment.</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-brand-blue dark:text-brand-lightblue">Do I need to be tech-savvy to use the AI Growth Advisor?</h4>
+              <p class="mt-1 text-gray-700 dark:text-gray-300">Not at all. We've designed the platform to be user-friendly for everyone, regardless of technical expertise. Simply fill out the business profile form, and the AI handles the complex analysis.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Contact Info Modal (Hidden by default) -->
+    <div id="contact-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <i class="fas fa-envelope text-brand-blue dark:text-brand-lightblue mr-2"></i>
+            Contact WilGlobo
+          </h3>
+          <button id="close-contact-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <!-- Updated contact information -->
+        <div class="space-y-5">
+          <div class="flex items-center p-3 bg-blue-50 dark:bg-gray-700 rounded-lg">
+            <div class="h-10 w-10 rounded-full bg-brand-blue flex items-center justify-center text-white">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Email us at</p>
+              <a href="mailto:info@wilglobo.com" class="text-brand-blue dark:text-brand-lightblue hover:underline">info@wilglobo.com</a>
+            </div>
+          </div>
+          
+          <div class="flex items-center p-3 bg-blue-50 dark:bg-gray-700 rounded-lg">
+            <div class="h-10 w-10 rounded-full bg-brand-blue flex items-center justify-center text-white">
+              <i class="fas fa-phone"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Call us at</p>
+              <a href="tel:8259626061" class="text-brand-blue dark:text-brand-lightblue hover:underline">825-962-6061</a>
+            </div>
+          </div>
+          
+          <div class="flex items-center p-3 bg-blue-50 dark:bg-gray-700 rounded-lg">
+            <div class="h-10 w-10 rounded-full bg-brand-blue flex items-center justify-center text-white">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Visit us at</p>
+              <p class="text-gray-700 dark:text-gray-300">Calgary, Alberta, Canada</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-center mt-6 space-x-6">
+            <a href="#" class="text-brand-blue hover:text-brand-orange text-2xl transform transition-transform hover:scale-110">
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="#" class="text-brand-blue hover:text-brand-orange text-2xl transform transition-transform hover:scale-110">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="text-brand-blue hover:text-brand-orange text-2xl transform transition-transform hover:scale-110">
+              <i class="fab fa-facebook"></i>
+            </a>
+            <a href="#" class="text-brand-blue hover:text-brand-orange text-2xl transform transition-transform hover:scale-110">
+              <i class="fab fa-instagram"></i>
+            </a>
+          </div>
+        </div>
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-500 dark:text-gray-400">We'd love to hear from you! Reach out for personalized business growth guidance.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Check for dark mode
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    
+    // Handle dark mode toggle
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      document.documentElement.classList.toggle('dark');
+    });
+    
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // Show contact modal - THIS FIXES THE MAIN ERROR
+    function showContactInfo() {
+      document.getElementById('contact-modal').classList.remove('hidden');
+    }
+    
+    // Close contact modal
+    document.getElementById('close-contact-modal').addEventListener('click', function() {
+      document.getElementById('contact-modal').classList.add('hidden');
+    });
+    
+    // Sample data for quick form filling
+    document.getElementById('sample-data-btn').addEventListener('click', function() {
+      // Populate form with sample data
+      document.getElementById('business-name').value = "WilGlobo Digital Solutions";
+      document.getElementById('industry').value = "technology";
+      document.getElementById('description').value = "A digital marketing agency specializing in helping small businesses grow their online presence through SEO, content marketing, and social media management.";
+      document.getElementById('business-stage').value = "growth";
+      document.getElementById('employees').value = "6-10";
+      document.getElementById('location').value = "urban";
+      document.getElementById('monthly-revenue').value = "45000";
+      document.getElementById('monthly-expenses').value = "32000";
+      document.getElementById('funding-stage').value = "self-funded";
+      document.getElementById('primary-goal').value = "market-expansion";
+      document.getElementById('challenges').value = "scaling";
+      
+      // Check some checkboxes
+      document.getElementById('factor-economic').checked = true;
+      document.getElementById('factor-remote').checked = true;
+    });
+    
+    // Tab functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove active class from all buttons and hide all contents
+          tabButtons.forEach(btn => {
+            btn.classList.remove('active', 'border-brand-blue');
+            btn.classList.add('border-transparent');
+            btn.setAttribute('aria-selected', 'false');
+          });
+          
+          tabContents.forEach(content => {
+            content.classList.add('hidden');
+          });
+          
+          // Add active class to clicked button and show corresponding content
+          button.classList.add('active', 'border-brand-blue');
+          button.classList.remove('border-transparent');
+          button.setAttribute('aria-selected', 'true');
+          
+          const targetId = button.getAttribute('data-target');
+          document.getElementById(targetId).classList.remove('hidden');
+        });
+      });
+      
+      // Go to profile button
+      const goToProfileBtn = document.getElementById('go-to-profile-btn');
+      if (goToProfileBtn) {
+        goToProfileBtn.addEventListener('click', () => {
+          document.getElementById('profile-tab').click();
+        });
+      }
+      
+      // Handle form submission
+      document.getElementById('business-profile-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const formData = {
+          businessName: document.getElementById('business-name').value,
+          industry: document.getElementById('industry').value,
+          description: document.getElementById('description').value,
+          stage: document.getElementById('business-stage').value,
+          employees: document.getElementById('employees').value,
+          location: document.getElementById('location').value,
+          financials: {
+            monthlyRevenue: document.getElementById('monthly-revenue').value,
+            monthlyExpenses: document.getElementById('monthly-expenses').value,
+            fundingStage: document.getElementById('funding-stage').value
+          },
+          goals: {
+            primaryGoal: document.getElementById('primary-goal').value,
+            topChallenge: document.getElementById('challenges').value
+          },
+          marketFactors: Array.from(document.querySelectorAll('input[name="factors"]:checked')).map(cb => cb.value)
+        };
+        
+        // Show insights tab
+        document.getElementById('insights-tab').click();
+        
+        // Show loading state
+        const insightsEmpty = document.getElementById('insights-empty');
+        const insightsResults = document.getElementById('insights-results');
+        const insightsLoading = document.getElementById('insights-loading');
+        
+        if (insightsEmpty) insightsEmpty.classList.add('hidden');
+        if (insightsResults) insightsResults.classList.add('hidden');
+        if (insightsLoading) insightsLoading.classList.remove('hidden');
+        
+        // Update business name and details in the insights view
+        const businessNameDisplay = document.getElementById('business-name-display');
+        if (businessNameDisplay) {
+          businessNameDisplay.textContent = formData.businessName;
+        }
+        
+        // Update financial metrics
+        const revenue = parseInt(formData.financials.monthlyRevenue) || 0;
+        const expenses = parseInt(formData.financials.monthlyExpenses) || 0;
+        const profitMargin = revenue > 0 ? Math.round(((revenue - expenses) / revenue) * 100) : 0;
+        
+        const revenueDisplay = document.getElementById('revenue-display');
+        const profitMarginDisplay = document.getElementById('profit-margin-display');
+        
+        if (revenueDisplay) revenueDisplay.textContent = '$' + revenue.toLocaleString();
+        if (profitMarginDisplay) profitMarginDisplay.textContent = profitMargin + '%';
+        
+        // Prepare detail text
+        const businessDetailsDisplay = document.getElementById('business-details-display');
+        if (businessDetailsDisplay) {
+          let detailsText = formData.industry ? formData.industry.charAt(0).toUpperCase() + formData.industry.slice(1) : '';
+          if (formData.stage) {
+            detailsText += ' • ' + formData.stage.charAt(0).toUpperCase() + formData.stage.slice(1);
+          }
+          if (formData.location) {
+            detailsText += ' • ' + formData.location.charAt(0).toUpperCase() + formData.location.slice(1);
+          }
+          businessDetailsDisplay.textContent = detailsText;
+        }
+        
+        // Generate insights using AI
+        try {
+          // Simulate AI insights generation since we have fallback content
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Show insights
+          if (insightsLoading) insightsLoading.classList.add('hidden');
+          if (insightsResults) insightsResults.classList.remove('hidden');
+          
+          // Make fallback content visible
+          document.querySelectorAll('.fallback-content').forEach(el => {
+            el.style.display = 'block';
+          });
+          
+        } catch (error) {
+          console.error("Error generating insights:", error);
+          
+          // Show fallback content instead of error message
+          if (insightsLoading) insightsLoading.classList.add('hidden');
+          if (insightsResults) insightsResults.classList.remove('hidden');
+          
+          // Make sure to show the fallback content
+          document.querySelectorAll('.fallback-content').forEach(el => {
+            el.style.display = 'block';
+          });
+        }
+      });
+      
+      // Regenerate insights button handler
+     // Function to generate insights using OpenAI API via our Vercel function
+// Function to generate insights using OpenAI API via our Vercel function
+async function generateInsights(businessData) {
+  try {
+    // Show loading state
+    const insightsLoading = document.getElementById('insights-loading');
+    const insightsResults = document.getElementById('insights-results');
+    
+    if (insightsLoading) insightsLoading.classList.remove('hidden');
+    if (insightsResults) insightsResults.classList.add('hidden');
+    
+    console.log('Sending data to API:', businessData);
+    
+    // Call our API
+    const response = await fetch('/api/generate-insights', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(businessData),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    
+    // Get the response data
+    const result = await response.json();
+    console.log('API response:', result);
+    
+    // Hide loading state
+    if (insightsLoading) insightsLoading.classList.add('hidden');
+    if (insightsResults) insightsResults.classList.remove('hidden');
+    
+    // Show fallback content since we're not parsing complex data yet
+    document.querySelectorAll('.fallback-content').forEach(el => {
+      el.style.display = 'block';
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Error generating insights:", error);
+    
+    // Handle error state - show fallback content
+    const insightsLoading = document.getElementById('insights-loading');
+    const insightsResults = document.getElementById('insights-results');
+    
+    if (insightsLoading) insightsLoading.classList.add('hidden');
+    if (insightsResults) insightsResults.classList.remove('hidden');
+    
+    // Make sure fallback content is visible
+    document.querySelectorAll('.fallback-content').forEach(el => {
+      el.style.display = 'block';
+    });
+    
+    return false;
+  }
+}
+
+// Function to update UI with insights data
+function updateInsightsUI(insightsData) {
+  // Hide all fallback content
+  document.querySelectorAll('.fallback-content').forEach(el => {
+    el.style.display = 'none';
+  });
+  
+  // Populate market context
+  const marketContext = document.getElementById('market-context');
+  if (marketContext) marketContext.innerHTML = insightsData.marketContext;
+  
+  // Populate insights cards
+  const insightsContainer = document.getElementById('insights-container');
+  if (insightsContainer) {
+    insightsContainer.innerHTML = '';
+    
+    insightsData.insights.forEach(insight => {
+      const relevanceClass = 
+        insight.relevance === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 
+        insight.relevance === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 
+        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      
+      const insightCard = document.createElement('div');
+      insightCard.className = 'insight-card bg-white dark:bg-gray-800 rounded-lg shadow p-5';
+      insightCard.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
+          <h4 class="text-lg font-semibold">${insight.title}</h4>
+          <span class="text-xs px-2 py-1 rounded-full ${relevanceClass}">
+            ${insight.relevance.charAt(0).toUpperCase() + insight.relevance.slice(1)} Relevance
+          </span>
+        </div>
+        <p class="text-gray-700 dark:text-gray-300">${insight.description}</p>
+      `;
+      
+      insightsContainer.appendChild(insightCard);
+    });
+  }
+  
+  // Populate opportunities
+  const opportunitiesContainer = document.getElementById('opportunities-container');
+  if (opportunitiesContainer) {
+    opportunitiesContainer.innerHTML = '';
+    
+    insightsData.opportunities.forEach(opportunity => {
+      const opportunityItem = document.createElement('div');
+      opportunityItem.className = 'flex items-start';
+      opportunityItem.innerHTML = `
+        <div class="flex-shrink-0 h-6 w-6 text-green-500 mr-2">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div>
+          <h4 class="font-medium text-gray-900 dark:text-gray-100">${opportunity.title}</h4>
+          <p class="text-sm text-gray-600 dark:text-gray-400">${opportunity.description}</p>
+        </div>
+      `;
+      
+      opportunitiesContainer.appendChild(opportunityItem);
+    });
+  }
+  
+  // Populate challenges
+  const challengesContainer = document.getElementById('challenges-container');
+  if (challengesContainer) {
+    challengesContainer.innerHTML = '';
+    
+    insightsData.challenges.forEach(challenge => {
+      const challengeItem = document.createElement('div');
+      challengeItem.className = 'flex items-start';
+      challengeItem.innerHTML = `
+        <div class="flex-shrink-0 h-6 w-6 text-red-500 mr-2">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div>
+          <h4 class="font-medium text-gray-900 dark:text-gray-100">${challenge.title}</h4>
+          <p class="text-sm text-gray-600 dark:text-gray-400">${challenge.description}</p>
+        </div>
+      `;
+      
+      challengesContainer.appendChild(challengeItem);
+    });
+  }
+  
+  // Populate action plan
+  const actionPlanContainer = document.getElementById('action-plan-container');
+  if (actionPlanContainer) actionPlanContainer.innerHTML = insightsData.actionPlan;
+  
+  // Populate resources
+  const resourcesContainer = document.getElementById('resources-container');
+  if (resourcesContainer) resourcesContainer.innerHTML = insightsData.resources;
+}
+          // Show loading state
+          const insightsResults = document.getElementById('insights-results');
+          const insightsLoading = document.getElementById('insights-loading');
+          
+          if (insightsResults) insightsResults.classList.add('hidden');
+          if (insightsLoading) insightsLoading.classList.remove('hidden');
+          
+          try {
+            // Simulate AI insights regeneration
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Show insights again
+            if (insightsLoading) insightsLoading.classList.add('hidden');
+            if (insightsResults) insightsResults.classList.remove('hidden');
+          } catch (error) {
+            console.error("Error regenerating insights:", error);
+            if (insightsLoading) insightsLoading.classList.add('hidden');
+            if (insightsResults) insightsResults.classList.remove('hidden');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "wilglobo-advisor",
+  "version": "1.0.0",
+  "description": "WilGlobo AI Growth Advisor",
+  "dependencies": {
+    "openai": "^4.20.1"
+  }
+}

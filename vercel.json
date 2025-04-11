@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "installCommand": "npm install",
+  "functions": {
+    "api/*.js": {
+      "memory": 1024
+    }
+  }
+}
