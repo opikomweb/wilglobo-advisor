@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "installCommand": "npm install",
-  "functions": {
-    "api/*.js": {
-      "memory": 1024
-    }
-  }
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "api/generate-insights.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
