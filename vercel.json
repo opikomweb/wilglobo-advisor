@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "index.html", "use": "@vercel/static" },
-    { "src": "api/generate-insights.js", "use": "@vercel/node" }
-  ],
+  "functions": {
+    "api/*.js": {
+      "memory": 1024
+    }
+  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
